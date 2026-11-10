@@ -27,10 +27,13 @@ def _fetch(url: str) -> str:
 
 
 def _onemarkets_price(isin: str) -> float | None:
-    day = (date.today() - timedelta(days=2)).strftime("%Y%m%d")
+    # A single-day window returns nothing on weekends/holidays (e.g. Mon/Tue
+    # -> Sat/Sun), so ask for the last week and take the newest record.
+    start = (date.today() - timedelta(days=7)).strftime("%Y%m%d")
+    end = date.today().strftime("%Y%m%d")
     url = (
-        f"{CHARTDATA_URL}?isin={isin}&underlyings=&underlyingsIds=&start={day}"
-        f"&end={day}&extras=&exchange=&tradingStartTime=00:00&tradingEndTime=23:59"
+        f"{CHARTDATA_URL}?isin={isin}&underlyings=&underlyingsIds=&start={start}"
+        f"&end={end}&extras=&exchange=&tradingStartTime=00:00&tradingEndTime=23:59"
         "&underlyingCurrency="
     )
     records = [r for r in _fetch(url).split() if r.strip(";")]
